@@ -6,7 +6,7 @@ dbstop if error
 glm= 'GLM_GUSTO';
 task='hedonicreactivity';
 
-list_roi = {'Pirif', 'hpp'};
+list_roi = {'Pirif', 'insula'};
 
 % which contrast
 con_name = {'Taste-noTaste'};
