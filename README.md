@@ -6,6 +6,8 @@ The repository contains all scripts needed to reproduce the results reported in 
 # Code
 
 The code is split in three main folders
+
+*  ./mouth_piece -3D printing files (stl) including seven versions with a diameter of 2.5 mm ± 0.3 mm in steps of 0.1 mm. 
  
 *  ./preprocessing -costum build pipeline for preprocessing the anatomical and functional data (FSL 3.3.0 and ANTs 2.1.0 or higher)
  
