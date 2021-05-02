@@ -3,10 +3,10 @@ function GLM_stLevel(subID)
 % compute first level model contrasts reward-control
 % no PM -> covariate 2nd level
 
-dbstop if error
+% dbstop if error
 
 %% define experiment setting parameters
-%subj       =   %subID;
+subj       =   subID; % to run on server
 
 %% What to do
 firstLevel    = 0;
@@ -40,8 +40,8 @@ addpath('/usr/local/external_toolboxes/spm12/');
 
 %% specify fMRI parameters
 param.TR = 2;
-param.im_format = 'nii'; %'img' or 'nii';
-param.ons_unit = 'secs'; % 'scans' or 'secs';
+param.im_format = 'nii'; 
+param.ons_unit = 'secs'; 
 spm('Defaults','fMRI');
 spm_jobman('initcfg');
 
@@ -52,7 +52,12 @@ param.task = {task};
 param.Cnam     = cell (length(param.task), 1);
 param.duration = cell (length(param.task), 1);
 
-%subj          = {'100'    ;'102'    ;'105'    ;'106'    ;'107'    ;'108'    ;'109'    ;'110'    ;'112'    ;'113'    ;'114'    ;'115'    ;'116'    ;'118'    ;'119'    ;'120'    ;'121'    ;'122'    ;'125'    ;'126'    ;'127'    ;'128'    ;'129'    ;'130'    ;'131'    ;'132'    ;'133'    };     % subject ID
+
+%subj          = {'100'    ;'102'    ;'105'    ;'106'    ;'107'    ;'108'
+%;'109'    ;'110'    ;'112'    ;'113'    ;'114'    ;'115'    ;'116'
+%;'118'    ;'119'    ;'120'    ;'121'    ;'122'    ;'125'    ;'126'
+%;'127'    ;'128'    ;'129'    ;'130'    ;'131'    ;'132'    ;'133'    };
+% to run locally
 
 for i = 1:length(param.task)
     
@@ -157,6 +162,7 @@ for i = 1:length(subj)
 end
 
 %% function section
+
     function [SPM] = doFirstLevel(subjoutdir,subjfuncdir,subjanatdir, name_ana, param, subjX)
 
         % variable initialization
@@ -206,9 +212,6 @@ end
             nconds=length(param.Cnam{ses});
 
 
-            %%%%%%%%%%%%%%%%%%%%%% !!!!!!!!!!!!!!!! %%%%%%%%%%%%%%%%%%%%%%%
-            % ATTENTION HERE WE NEED TO INITALIZE c for every new session
-
             c = 0; % we need a counter because we include only condition that are non empty
 
             for cc=1:nconds
@@ -241,16 +244,7 @@ end
                                     SPM.Sess(ses).U(c).P(nc).name  = mod_name;
                                     SPM.Sess(ses).U(c).P(nc).P     = eval([param.modul{ses}{cc} '.' mod_name]);
                                     SPM.Sess(ses).U(c).P(nc).h     = 1;
-
-                                    matlabbatch{1}.spm.stats.fmri_spec.sess(ses).cond(c).name       = {param.Cnam{ses}{cc}};
-                                    matlabbatch{1}.spm.stats.fmri_spec.sess(ses).cond(c).onset      = eval(param.Cnam{ses}{cc});
-                                    matlabbatch{1}.spm.stats.fmri_spec.sess(ses).cond(c).duration   = eval(param.duration{ses}{cc});
-                                    matlabbatch{1}.spm.stats.fmri_spec.sess(ses).cond(c).tmod       = 0;
-
-                                    matlabbatch{1}.spm.stats.fmri_spec.sess(ses).cond(c).pmod(nc).name  = mod_name;
-                                    matlabbatch{1}.spm.stats.fmri_spec.sess(ses).cond(c).pmod(nc).param = eval([param.modul{ses}{cc} '.' mod_name]);
-                                    matlabbatch{1}.spm.stats.fmri_spec.sess(ses).cond(c).pmod(nc).poly  = 1;
-                                    matlabbatch{1}.spm.stats.fmri_spec.sess(ses).cond(c).orth = 0;
+                                    
                                 end
 
 
@@ -258,16 +252,7 @@ end
                                 SPM.Sess(ses).U(c).P(1).name  = char(param.modulName{ses}{cc});
                                 SPM.Sess(ses).U(c).P(1).P     = eval(param.modul{ses}{cc});
                                 SPM.Sess(ses).U(c).P(1).h     = 1;
-
-                                matlabbatch{1}.spm.stats.fmri_spec.sess(ses).cond(c).name       = {param.Cnam{ses}{cc}};
-                                matlabbatch{1}.spm.stats.fmri_spec.sess(ses).cond(c).onset      = eval(param.Cnam{ses}{cc});
-                                matlabbatch{1}.spm.stats.fmri_spec.sess(ses).cond(c).duration   = eval(param.duration{ses}{cc});
-                                matlabbatch{1}.spm.stats.fmri_spec.sess(ses).cond(c).tmod       = 0;
-
-                                matlabbatch{1}.spm.stats.fmri_spec.sess(ses).cond(c).pmod.name  = char(param.modulName{ses}{cc});
-                                matlabbatch{1}.spm.stats.fmri_spec.sess(ses).cond(c).pmod.param = eval(param.modul{ses}{cc});
-                                matlabbatch{1}.spm.stats.fmri_spec.sess(ses).cond(c).pmod.poly  = 1;
-
+                                
                             end
                         end
                     end
@@ -276,9 +261,9 @@ end
         end
 
         %-----------------------------
-        %multiple regressors for mvts parameters ( no movement regressor
+        %multiple regressors for mvts parameters (no movement regressor
         %after ICA)
-
+        
         %rnam = {'X','Y','Z','x','y','z'};
         for ses=1:ntask
 
@@ -307,24 +292,10 @@ end
         %--------------------------------------------------------------------------
         SPM.xBF.length     = 0;
 
-        % OPTIONS: microtime time resolution and microtime onsets (this paramter
-        % should not be change according to the spm 12 manual (unless very long TR)
-        %-------------------------------------------------------------------------
-        %         V  = spm_vol(SPM.xY.P(1,:));
-        %         if iscell(V)
-        %             nslices = V{1}{1}.dim(3);
-        %         else
-        %             nslices = V(1).dim(3);
-        %         end
-        %         ref_slice          = floor(nslices/2);  % middle slice in time
-        %         SPM.xBF.T          = nslices;           % do not change unless long TR (spm12 manual)
-        %         SPM.xBF.T0         = ref_slice;		    % middle slice/timebin          % useless? cf. defaults above
-        %
-        % OPTIONS: 'scans'|'secs' for onsets
         %--------------------------------------------------------------------------
         SPM.xBF.UNITS      = param.ons_unit;
 
-        % % OPTIONS: 1|2 = order of convolution: du haut--> bas t?te ou l'inverse
+        % % OPTIONS: 1|2 = order of convolution
         %--------------------------------------------------------------------------
         SPM.xBF.Volterra   = 1;
 
@@ -338,7 +309,7 @@ end
 
         % intrinsic autocorrelations: OPTIONS: 'none'|'AR(1) + w'
         %--------------------------------------------------------------------------
-        SPM.xVi.form       = 'AR(1)'; %AR(0.2)???? SOSART
+        SPM.xVi.form       = 'AR(1)'; 
 
         % specify SPM working dir for this sub
         %==========================================================================
@@ -347,7 +318,6 @@ end
         % set threshold of mask
         %==========================================================================
         SPM.xM.gMT = -Inf;% set -inf if we want to use explicit masking 0.8 is the spm default
-
 
         % Configure design matrix
         %==========================================================================
@@ -383,8 +353,8 @@ end
         for j = 1:ncondition
 
             taskN = SPM.xX.name{j} (4);
-            task  = ['task' taskN '.'];
-            conditionName{j} = strcat(task,SPM.xX.name{j} (18:end-6));
+            task_name  = ['task' taskN '.'];
+            conditionName{j} = strcat(task_name,SPM.xX.name{j} (18:end-6));
 
         end
 
@@ -421,13 +391,11 @@ end
         end
         
         
-        
         % task the job
         spm_jobman('run',jobs)
         
         disp ('contrasts created!')
     end
-
 
 
 
