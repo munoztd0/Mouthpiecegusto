@@ -1,25 +1,28 @@
+  
+  
+    ##################################################################################################
+    # Created  by D.M.T. on AUGUST 2021                                                           
+    ##################################################################################################
+    #                                      PRELIMINARY STUFF ----------------------------------------
+    
+    #load libraries
+    
+    if(!require(pacman)) {
+      install.packages("pacman")
+      install.packages("devtools")
+      library(pacman)
+    }
+    
+    #get packages
+    pacman::p_load(tidyverse, dplyr, plyr, Rmisc, afex, BayesFactor, ggpubr) 
+    
+    # get tools
+    devtools::source_gist("383aa93ffa161665c0dca1103ef73d9d", 
+                          filename = "effect_CI.R")
+    devtools::source_gist("2a1bb0133ff568cbe28d", 
+                          filename = "geom_flat_violin.R")
 
 
-  ##################################################################################################
-  # Created  by D.M.T. on AUGUST 2021                                                           
-  ##################################################################################################
-  #                                      PRELIMINARY STUFF ----------------------------------------
-  
-  #load libraries
-  
-  if(!require(pacman)) {
-    install.packages("pacman")
-    install.packages("devtools")
-    library(pacman)
-  }
-  
-  pacman::p_load(tidyverse, dplyr, plyr, Rmisc, afex, BayesFactor, ggpubr) 
-  
-  # get tool
-  devtools::source_gist("2a1bb0133ff568cbe28d", 
-                        filename = "geom_flat_violin.R")
-  source('~/OBIWAN/GUSTO/cohen_d_ci.R', echo=F)
-  source('~/OBIWAN/GUSTO/pes_ci.R', echo=F)
   
   # -------------------------------------------------------------------------
   # *************************************** SETUP **************************************
@@ -27,15 +30,15 @@
   
   
   # Set path
-  home_path       <- '~/OBIWAN'
+    analysis_path = getwd()
+
   
   # Set working directory
-  analysis_path <- file.path(home_path, 'GUSTO')
-  figures_path  <- file.path(home_path, 'GUSTO/FIGURES') 
+  figures_path  <- file.path(analysis_path, '/FIGURES') 
   setwd(analysis_path)
   
   #datasets dictory
-  data_path <- file.path(home_path,'DERIVATIVES/BEHAV') 
+  data_path <- file.path(analysis_path,'/DATA') 
   
   # open datasets
   HED  <- read.delim(file.path(data_path,'OBIWAN_HEDONIC.txt'), header = T, sep ='') # 
@@ -51,8 +54,6 @@
   #merge with info
   HED = merge(HED, info, by = "id")
   
-  
-  
   # Check Demo
   AGE = ddply(HED,.(), summarise,mean=mean(age),sd=sd(age), min = min(age), max = max(age)); AGE
   GENDER = ddply(HED, .(id), summarise, gender=mean(as.numeric(gender)))  %>%
@@ -61,7 +62,7 @@
   
   cov = ddply(HED, .(id),  summarize, age = mean(age, na.rm = TRUE), gender = mean(as.numeric(gender), na.rm = TRUE)) ; cov$age = scale(cov$age)
   
-  write.table(cov, (file.path(analysis_path, "covariate.txt")), row.names = F, sep="\t")
+  write.table(cov, (file.path(analysis_path, "/fMRI/covariate.txt")), row.names = F, sep="\t")
   
   
   
@@ -117,7 +118,7 @@
     geom_flat_violin(scale = "count", trim = FALSE, alpha = .2, aes(fill = condition, color = NA))+
     geom_point(aes(x = condjit), alpha = .3,) +
     geom_crossbar(data = dfH, aes(y = perceived_intensity, ymin=perceived_intensity-ci, ymax=perceived_intensity+ci,), width = 0.2 , alpha = 0.1)+
-    ylab('Intensity ratings') +
+    ylab('Perceived taste intesity') +
     xlab('') +
     scale_y_continuous(expand = c(0, 0), breaks = c(seq.int(0,100, by = 20)), limits = c(-0.5,100.5)) +
     scale_x_continuous(labels=c("Milkshake", "Tasteless"),breaks = c(-.25,.25), limits = c(-.5,.5)) +
@@ -131,10 +132,15 @@
   
   
   # STATS -------------------------------------------------------------------
+  HED.means$condition <- relevel(HED.means$condition, "MilkShake") # Make MilkShake first
   
   # intensity
+  t.test(perceived_intensity ~ condition, data = HED.means, paired = T)
   
-  anova.HED <- aov_car(perceived_intensity ~ condition  + Error (id/condition), data = HED.means, factorize = F, anova_table = list(correction = "GG", es = "none")); summary(anova.HED)
+  
+  cohen_d_ci(HED.means$perceived_intensity[HED.means$condition == "MilkShake"], HED.means$perceived_intensity[HED.means$condition == "Empty"], paired=T)
+    
+    anova.HED <- aov_car(perceived_intensity ~ condition  + Error (id/condition), data = HED.means, factorize = F, anova_table = list(correction = "GG", es = "none")); summary(anova.HED)
   
   pes_ci(perceived_intensity ~ condition + Error (id/condition), data = HED.means, factorize = F, epsilon = "GG")
   
