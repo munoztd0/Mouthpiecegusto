@@ -1,7 +1,6 @@
-%function extract_betas_mods(glm, task)
-%use to be a function but I got tired of it
+% script to extract betas
 
-dbstop if error
+%dbstop if error
 
 glm= 'GLM_GUSTO';
 task='hedonicreactivity';
@@ -9,10 +8,8 @@ task='hedonicreactivity';
 list_roi = {'Pirif', 'insula'};
 
 % which contrast
-con_name = {'Taste-noTaste'};
 con_list = {'con_0002.nii'; 'con_0003.nii'}; %
 con_name = {'reward'; 'neutral'}; %
-
 
 
 %% DEFINE PATH
@@ -20,13 +17,6 @@ cd ~
 home = pwd;
 homedir = [home '/OBIWAN'];
 
-% control = [homedir '/DERIVATIVES/GLM/SPM/' task '/' glm '/sub-control*'];
-% obese = [homedir '/DERIVATIVES/GLM/SPM/' task '/' glm '/sub-obese*'];
-% 
-% controlX = dir(control);
-% obeseX = dir(obese);
-% 
-% sub_list = vertcat(controlX, obeseX);
 
 for k=1:length(con_list)
     
@@ -36,10 +26,6 @@ for k=1:length(con_list)
     sub_list = dir(subj);
 
     roi_dir = fullfile(homedir, '/DERIVATIVES/GLM/SPM',task, glm, 'group', 'ROI');
-
-
-    % for k = 1:length(list_roi)
-    %     ROI_name = list_roi{k};
 
     % intialize spm 
     spm('defaults','fmri');
@@ -64,15 +50,8 @@ for k=1:length(con_list)
             roi_volume_mm = length(find(Y > 0))*abs(det(v_mask.mat));
             clear Y;
 
-    %         %loop across contrasts
-    %         for c = 1:length()
             conName = con_list{k};
-            % List of files to extract data from
-
-    %                 for s0 = 1:length(sub_list)  % select con image from every subject
-    %                     conDir = fullfile(dir_data, [sub_list(s0,:).name '_' char(con_list(c,:))]); %add Model directory if necessary
-    %                     images(s0,:) = conDir;
-    %                 end
+ 
 
             fprintf(1,[char(conName) ': Memory mapping images...\n']);
 
