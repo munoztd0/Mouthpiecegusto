@@ -216,11 +216,7 @@
   cairo_pdf(file.path(figures_path,'Figure_HEDONIC.pdf'))
   print(figure)
   dev.off()
-  
-  #tests
-  
-  # bf = ttestBF(formula = betas ~ condition, data = subset(df, region == 'insula')); bf
-  # t = t.test(formula = betas ~ condition, data = df); t
+
   
   
   # PubMed count ------------------------------------------------------------
