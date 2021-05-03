@@ -62,7 +62,7 @@
   
   cov = ddply(HED, .(id),  summarize, age = mean(age, na.rm = TRUE), gender = mean(as.numeric(gender), na.rm = TRUE)) ; cov$age = scale(cov$age)
   
-  write.table(cov, (file.path(analysis_path, "unvariate/covariate.txt")), row.names = F, sep="\t")
+  write.table(cov, (file.path(analysis_path, "univariate/covariate.txt")), row.names = F, sep="\t")
   
   
   
