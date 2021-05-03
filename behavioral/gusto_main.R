@@ -34,11 +34,11 @@
 
   
   # Set working directory
-  figures_path  <- file.path(analysis_path, '/FIGURES') 
+  figures_path  <- file.path(analysis_path, 'behavioral/FIGURES') 
   setwd(analysis_path)
   
   #datasets dictory
-  data_path <- file.path(analysis_path,'/DATA') 
+  data_path <- file.path(analysis_path,'behavioral/DATA') 
   
   # open datasets
   HED  <- read.delim(file.path(data_path,'OBIWAN_HEDONIC.txt'), header = T, sep ='') # 
@@ -62,7 +62,7 @@
   
   cov = ddply(HED, .(id),  summarize, age = mean(age, na.rm = TRUE), gender = mean(as.numeric(gender), na.rm = TRUE)) ; cov$age = scale(cov$age)
   
-  write.table(cov, (file.path(analysis_path, "/fMRI/covariate.txt")), row.names = F, sep="\t")
+  write.table(cov, (file.path(analysis_path, "univariate/covariate.txt")), row.names = F, sep="\t")
   
   
   
@@ -140,7 +140,7 @@
   
   cohen_d_ci(HED.means$perceived_intensity[HED.means$condition == "MilkShake"], HED.means$perceived_intensity[HED.means$condition == "Empty"], paired=T)
     
-    anova.HED <- aov_car(perceived_intensity ~ condition  + Error (id/condition), data = HED.means, factorize = F, anova_table = list(correction = "GG", es = "none")); summary(anova.HED)
+  anova.HED <- aov_car(perceived_intensity ~ condition  + Error (id/condition), data = HED.means, factorize = F, anova_table = list(correction = "GG", es = "none")); summary(anova.HED)
   
   pes_ci(perceived_intensity ~ condition + Error (id/condition), data = HED.means, factorize = F, epsilon = "GG")
   
@@ -164,7 +164,7 @@
   
   # PLOT fMRI exctracted BETAS INSULA ----------------------------------------------------------------
   
-  mri_path <- file.path(home_path,'DERIVATIVES/GLM/SPM/hedonicreactivity/GLM_GUSTO/group/ROI') 
+  mri_path <- file.path(analysis_path,'/behavioral/DATA/') 
   
   # open datasets
   rew_mri  <- read.delim(file.path(mri_path,'reward/insula_betas.csv'), header = T, sep =',') # 
@@ -220,7 +220,7 @@
   
   
   # PubMed count ------------------------------------------------------------
-  df_pub <- read_csv("pub.csv")
+  df_pub  <- read.delim(file.path(mri_path,'pub.csv'), header = T, sep =',') # 
   
   df_pub = df_pub %>% drop_na(Year)
   df = count(df_pub, "Year")
